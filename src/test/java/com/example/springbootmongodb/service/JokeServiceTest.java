@@ -2,19 +2,16 @@ package com.example.springbootmongodb.service;
 
 import com.example.springbootmongodb.app.model.Joke;
 import com.example.springbootmongodb.db.JokeRepository;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Optional;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @MockitoSettings
@@ -36,9 +33,8 @@ public class JokeServiceTest {
     @Test
     void givenRestTemplateReturnsNullWhenCallingGetJokeThenReturnsEmptyOptional() {
         // when
-        Optional<Joke> actual = underTest.getJoke();
+        assertThrows(RuntimeException.class, () -> underTest.getJokes(1));
         // then
-        assertTrue(actual.isEmpty());
         verifyNoInteractions(jokeRepository);
     }
 
@@ -49,10 +45,10 @@ public class JokeServiceTest {
         doReturn(true).when(jokeRepository).existsById("1");
         doReturn(expected).when(restTemplate).getForObject(JokeService.URL, Joke.class);
         // when
-        Optional<Joke> actual = underTest.getJoke();
+        List<Joke> actual = underTest.getJokes(1);
         // then
-        assertTrue(actual.isPresent());
-        assertEquals(expected, actual.get());
+        assertFalse(actual.isEmpty());
+        assertEquals(List.of(expected), actual);
         verify(jokeRepository, times(0)).save(any(Joke.class));
     }
 
@@ -61,11 +57,12 @@ public class JokeServiceTest {
         // given
         Joke expected = new Joke(1, "general", "one", "two");
         doReturn(expected).when(restTemplate).getForObject(JokeService.URL, Joke.class);
+        doReturn(expected).when(jokeRepository).save(expected);
         // when
-        Optional<Joke> actual = underTest.getJoke();
+        List<Joke> actual = underTest.getJokes(1);
         // then
-        assertTrue(actual.isPresent());
-        assertEquals(expected, actual.get());
+        assertFalse(actual.isEmpty());
+        assertEquals(List.of(expected), actual);
         verify(jokeRepository).save(any(Joke.class));
     }
 }

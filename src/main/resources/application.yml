@@ -1,1 +1,2 @@
+jokes.count.defaultValue: 5
 spring.data.mongodb.host: db

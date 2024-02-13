@@ -1,5 +1,6 @@
 package com.example.springbootmongodb;
 
+import com.example.springbootmongodb.infra.rest.JokeController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -23,11 +24,19 @@ class SpringBootMongodbApplicationTests {
 	}
 
 	@Test
-	void shouldReturnBadRequest() throws Exception {
+	void givenCountTooHighWhenCallingGetJokesThenShouldReturnBadRequest() throws Exception {
 		mockMvc.perform(get("/jokes?count=101"))
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-				.andExpect(content().string(is("You can get no more than 100 jokes at a time")));
+				.andExpect(content().string(is(JokeController.COUNT_TOO_HIGH_MESSAGE)));
+	}
+
+	@Test
+	void givenCountTooLowWhenCallingGetJokesThenShouldReturnBadRequest() throws Exception {
+		mockMvc.perform(get("/jokes?count=0"))
+				.andDo(print())
+				.andExpect(status().isBadRequest())
+				.andExpect(content().string(is(JokeController.COUNT_TOO_LOW_MESSAGE)));
 	}
 
 	@Test
